@@ -59,15 +59,16 @@ const updateDocument = async (
   }
 
   try {
-    const document = await ModelClass.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true
-    });
+    let document = await ModelClass.findById(id);
+
     if (!document) {
       return res.status(HttpStatus.NOT_FOUND).send({
         error: `Document not found in collection ${ModelClass.collection.name}`
       });
     }
+
+    Object.keys(updates).forEach(field => (document[field] = updates[field]));
+    document = await document.save();
     res.status(HttpStatus.OK).send(document);
   } catch (e) {
     const statusCode = badRequestErrors.includes(e.name)
