@@ -47,8 +47,9 @@ const updateDocument = async (
   res,
   allowedUpdates = []
 ) => {
+  const updateFields = Object.keys(updates);
   if (allowedUpdates.length > 0) {
-    const invalidUpdates = Object.keys(updates).filter(
+    const invalidUpdates = updateFields.filter(
       update => !allowedUpdates.includes(update)
     );
     if (invalidUpdates.length > 0) {
@@ -67,7 +68,9 @@ const updateDocument = async (
       });
     }
 
-    Object.keys(updates).forEach(field => (document[field] = updates[field]));
+    updateFields.forEach(field => {
+      document[field] = updates[field];
+    });
     document = await document.save();
     res.status(HttpStatus.OK).send(document);
   } catch (e) {
