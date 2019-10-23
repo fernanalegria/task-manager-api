@@ -94,19 +94,4 @@ userRouter.patch("/me", auth, async (req, res) => {
   }
 });
 
-userRouter = updateRouter(
-  userRouter,
-  User,
-  {
-    create: false,
-    readDetail: false,
-    readAll: false,
-    update: true,
-    delete: false
-  },
-  {
-    allowedUpdates: ["name", "email", "password", "age"]
-  }
-);
-
 module.exports = userRouter;
