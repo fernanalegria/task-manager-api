@@ -1,5 +1,6 @@
 const HttpStatus = require("http-status-codes");
 const express = require("express");
+const { auth } = require("../middleware");
 
 const badRequestErrors = ["ValidationError", "CastError"];
 
@@ -100,27 +101,32 @@ const deleteDocument = async (ModelClass, id, res) => {
   }
 };
 
-const getRouter = (ModelClass, methods, options = {}) => {
+const getRouter = (ModelClass, methods, options) => {
   const router = new express.Router();
+  return updateRouter(router, ModelClass, methods, options);
+};
 
+const updateRouter = (router, ModelClass, methods, options = {}) => {
   if (methods.create) {
-    router.post("", (req, res) => {
+    router.post("", auth, (req, res) => {
       createDocument(ModelClass, req.body, res);
     });
   }
 
-  if (methods.read) {
-    router.get("", (_req, res) => {
+  if (methods.readAll) {
+    router.get("", auth, (_req, res) => {
       getAllDocuments(ModelClass, res);
     });
+  }
 
-    router.get("/:id", (req, res) => {
+  if (methods.readDetail) {
+    router.get("/:id", auth, (req, res) => {
       getDocumentById(ModelClass, req.params.id, res);
     });
   }
 
   if (methods.update) {
-    router.patch("/:id", (req, res) => {
+    router.patch("/:id", auth, (req, res) => {
       updateDocument(
         ModelClass,
         req.params.id,
@@ -132,7 +138,7 @@ const getRouter = (ModelClass, methods, options = {}) => {
   }
 
   if (methods.delete) {
-    router.delete("/:id", (req, res) => {
+    router.delete("/:id", auth, (req, res) => {
       deleteDocument(ModelClass, req.params.id, res);
     });
   }
@@ -146,5 +152,6 @@ module.exports = {
   getDocumentById,
   updateDocument,
   deleteDocument,
-  getRouter
+  getRouter,
+  updateRouter
 };

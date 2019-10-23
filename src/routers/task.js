@@ -5,7 +5,8 @@ module.exports = getRouter(
   Task,
   {
     create: true,
-    read: true,
+    readDetail: true,
+    readAll: true,
     update: true,
     delete: true
   },

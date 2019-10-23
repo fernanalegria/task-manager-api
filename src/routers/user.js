@@ -1,19 +1,11 @@
-const { getRouter } = require("./crud");
-const { User } = require("../models");
 const HttpStatus = require("http-status-codes");
+const express = require("express");
 
-const userRouter = getRouter(
-  User,
-  {
-    create: false,
-    read: true,
-    update: true,
-    delete: true
-  },
-  {
-    allowedUpdates: ["name", "email", "password", "age"]
-  }
-);
+const { updateRouter } = require("./crud");
+const { User } = require("../models");
+const { auth } = require("../middleware");
+
+let userRouter = new express.Router();
 
 userRouter.post("", async (req, res) => {
   const userInstance = new User(req.body);
@@ -39,5 +31,24 @@ userRouter.post("/login", async (req, res) => {
     res.status(HttpStatus.BAD_REQUEST).send({ error: e.message });
   }
 });
+
+userRouter.get("/me", auth, async (req, res) => {
+  res.status(HttpStatus.OK).send(req.user);
+});
+
+userRouter = updateRouter(
+  userRouter,
+  User,
+  {
+    create: false,
+    readDetail: true,
+    readAll: false,
+    update: true,
+    delete: true
+  },
+  {
+    allowedUpdates: ["name", "email", "password", "age"]
+  }
+);
 
 module.exports = userRouter;

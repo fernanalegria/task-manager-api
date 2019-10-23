@@ -45,12 +45,14 @@ const userSchema = new mongoose.Schema({
       }
     }
   },
-  tokens: [{
-    token: {
-      type: String,
-      required: true
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true
+      }
     }
-  }]
+  ]
 });
 
 userSchema.methods.generateAuthToken = async function() {
@@ -59,7 +61,7 @@ userSchema.methods.generateAuthToken = async function() {
     {
       _id: user._id
     },
-    "thisismynewcourse",
+    process.env.SECRET_KEY,
     { expiresIn: "1 day" }
   );
   user.tokens.push({ token });
