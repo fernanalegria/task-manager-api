@@ -4,6 +4,14 @@ const { auth } = require("../middleware");
 
 const badRequestErrors = ["ValidationError", "CastError"];
 
+const getErrorResponse = e => {
+  const statusCode = badRequestErrors.includes(e.name)
+    ? HttpStatus.BAD_REQUEST
+    : HttpStatus.SERVICE_UNAVAILABLE;
+  const error = e.errmsg ? e.errmsg : e.message;
+  return { error, statusCode };
+};
+
 const createDocument = async (ModelClass, document, res) => {
   const instance = new ModelClass(document);
   try {
@@ -33,10 +41,7 @@ const getDocumentById = async (ModelClass, id, res) => {
     }
     res.status(HttpStatus.OK).send(document);
   } catch (e) {
-    const statusCode = badRequestErrors.includes(e.name)
-      ? HttpStatus.BAD_REQUEST
-      : HttpStatus.SERVICE_UNAVAILABLE;
-    const error = e.errmsg ? e.errmsg : e.message;
+    const { error, statusCode } = getErrorResponse(e);
     res.status(statusCode).send({ error });
   }
 };
@@ -75,10 +80,7 @@ const updateDocument = async (
     document = await document.save();
     res.status(HttpStatus.OK).send(document);
   } catch (e) {
-    const statusCode = badRequestErrors.includes(e.name)
-      ? HttpStatus.BAD_REQUEST
-      : HttpStatus.SERVICE_UNAVAILABLE;
-    const error = e.errmsg ? e.errmsg : e.message;
+    const { error, statusCode } = getErrorResponse(e);
     res.status(statusCode).send({ error });
   }
 };
@@ -93,10 +95,7 @@ const deleteDocument = async (ModelClass, id, res) => {
     }
     res.status(HttpStatus.NO_CONTENT).send();
   } catch (e) {
-    const statusCode = badRequestErrors.includes(e.name)
-      ? HttpStatus.BAD_REQUEST
-      : HttpStatus.SERVICE_UNAVAILABLE;
-    const error = e.errmsg ? e.errmsg : e.message;
+    const { error, statusCode } = getErrorResponse(e);
     res.status(statusCode).send({ error });
   }
 };
@@ -152,6 +151,7 @@ module.exports = {
   getDocumentById,
   updateDocument,
   deleteDocument,
+  getErrorResponse,
   getRouter,
   updateRouter
 };
