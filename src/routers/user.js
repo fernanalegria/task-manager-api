@@ -7,6 +7,8 @@ const { auth } = require("../middleware");
 
 let userRouter = new express.Router();
 
+const logoutMsg = "Unable to log out user";
+
 userRouter.post("", async (req, res) => {
   const userInstance = new User(req.body);
   try {
@@ -29,6 +31,28 @@ userRouter.post("/login", async (req, res) => {
     res.status(HttpStatus.OK).send({ user, token });
   } catch (e) {
     res.status(HttpStatus.BAD_REQUEST).send({ error: e.message });
+  }
+});
+
+userRouter.post("/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter(doc => doc.token !== req.token);
+    await req.user.save();
+
+    res.status(HttpStatus.OK).send();
+  } catch (e) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: logoutMsg });
+  }
+});
+
+userRouter.post("/logoutAll", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+
+    res.status(HttpStatus.OK).send();
+  } catch (e) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: logoutMsg });
   }
 });
 
