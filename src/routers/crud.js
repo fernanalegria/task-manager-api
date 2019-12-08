@@ -12,7 +12,10 @@ const getErrorResponse = e => {
   return { error, statusCode };
 };
 
-const createDocument = async (ModelClass, document, res) => {
+const createDocument = async (ModelClass, body, user, res) => {
+  const document = Object.keys(ModelClass.schema.paths).includes("owner")
+    ? { ...body, owner: user._id }
+    : body;
   const instance = new ModelClass(document);
   try {
     const document = await instance.save();
@@ -108,7 +111,7 @@ const getRouter = (ModelClass, methods, options) => {
 const updateRouter = (router, ModelClass, methods, options = {}) => {
   if (methods.create) {
     router.post("", auth, (req, res) => {
-      createDocument(ModelClass, req.body, res);
+      createDocument(ModelClass, req.body, req.user, res);
     });
   }
 
