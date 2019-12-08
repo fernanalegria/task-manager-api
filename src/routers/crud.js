@@ -12,10 +12,13 @@ const getErrorResponse = e => {
   return { error, statusCode };
 };
 
-const createDocument = async (ModelClass, body, user, res) => {
-  const document = Object.keys(ModelClass.schema.paths).includes("owner")
-    ? { ...body, owner: user._id }
-    : body;
+const hasOwner = ModelClass =>
+  Object.keys(ModelClass.schema.paths).includes("owner");
+
+const createDocument = async (ModelClass, document, user, res) => {
+  if (hasOwner(ModelClass)) {
+    document.owner = user._id;
+  }
   const instance = new ModelClass(document);
   try {
     const document = await instance.save();
@@ -25,18 +28,26 @@ const createDocument = async (ModelClass, body, user, res) => {
   }
 };
 
-const getAllDocuments = async (ModelClass, res) => {
+const getAllDocuments = async (ModelClass, user, res) => {
   try {
-    const allDocuments = await ModelClass.find({});
+    const search = {};
+    if (hasOwner(ModelClass)) {
+      search.owner = user._id;
+    }
+    const allDocuments = await ModelClass.find(search);
     res.status(HttpStatus.OK).send(allDocuments);
   } catch (e) {
     res.status(HttpStatus.SERVICE_UNAVAILABLE).send();
   }
 };
 
-const getDocumentById = async (ModelClass, id, res) => {
+const getDocumentById = async (ModelClass, id, user, res) => {
   try {
-    const document = await ModelClass.findById(id);
+    const search = { _id: id };
+    if (hasOwner(ModelClass)) {
+      search.owner = user._id;
+    }
+    const document = await ModelClass.findOne(search);
     if (!document) {
       return res.status(HttpStatus.NOT_FOUND).send({
         error: `Document not found in collection ${ModelClass.collection.name}`
@@ -52,6 +63,7 @@ const getDocumentById = async (ModelClass, id, res) => {
 const updateDocument = async (
   ModelClass,
   id,
+  user,
   updates,
   res,
   allowedUpdates = []
@@ -69,7 +81,11 @@ const updateDocument = async (
   }
 
   try {
-    let document = await ModelClass.findById(id);
+    const search = { _id: id };
+    if (hasOwner(ModelClass)) {
+      search.owner = user._id;
+    }
+    let document = await ModelClass.findOne(search);
 
     if (!document) {
       return res.status(HttpStatus.NOT_FOUND).send({
@@ -88,9 +104,13 @@ const updateDocument = async (
   }
 };
 
-const deleteDocument = async (ModelClass, id, res) => {
+const deleteDocument = async (ModelClass, id, user, res) => {
   try {
-    const document = await ModelClass.findByIdAndRemove(id);
+    const search = { _id: id };
+    if (hasOwner(ModelClass)) {
+      search.owner = user._id;
+    }
+    const document = await ModelClass.findOneAndRemove(search);
     if (!document) {
       return res.status(HttpStatus.NOT_FOUND).send({
         error: `Document not found in collection ${ModelClass.collection.name}`
@@ -116,14 +136,14 @@ const updateRouter = (router, ModelClass, methods, options = {}) => {
   }
 
   if (methods.readAll) {
-    router.get("", auth, (_req, res) => {
-      getAllDocuments(ModelClass, res);
+    router.get("", auth, (req, res) => {
+      getAllDocuments(ModelClass, req.user, res);
     });
   }
 
   if (methods.readDetail) {
     router.get("/:id", auth, (req, res) => {
-      getDocumentById(ModelClass, req.params.id, res);
+      getDocumentById(ModelClass, req.params.id, req.user, res);
     });
   }
 
@@ -132,6 +152,7 @@ const updateRouter = (router, ModelClass, methods, options = {}) => {
       updateDocument(
         ModelClass,
         req.params.id,
+        req.user,
         req.body,
         res,
         options.allowedUpdates
@@ -141,7 +162,7 @@ const updateRouter = (router, ModelClass, methods, options = {}) => {
 
   if (methods.delete) {
     router.delete("/:id", auth, (req, res) => {
-      deleteDocument(ModelClass, req.params.id, res);
+      deleteDocument(ModelClass, req.params.id, req.user, res);
     });
   }
 
