@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Task = require("./task");
 
-const User = mongoose.model("User", {
+const failedLoginMsg = "Unable to login";
+
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -10,6 +15,7 @@ const User = mongoose.model("User", {
   email: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
     lowercase: true,
     validate(value) {
@@ -39,7 +45,72 @@ const User = mongoose.model("User", {
         throw new Error("Age must be a positive number");
       }
     }
-  }
+  },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true
+      }
+    }
+  ]
 });
+
+userSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "owner"
+});
+
+userSchema.methods.toJSON = function() {
+  const user = this;
+  const userObject = user.toObject();
+  delete userObject.password;
+  delete userObject.tokens;
+  return userObject;
+};
+
+userSchema.methods.generateAuthToken = async function() {
+  const user = this;
+  const token = await jwt.sign(
+    {
+      _id: user._id
+    },
+    process.env.SECRET_KEY,
+    { expiresIn: "1 day" }
+  );
+  user.tokens.push({ token });
+  await user.save();
+  return token;
+};
+
+userSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error(failedLoginMsg);
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error(failedLoginMsg);
+  }
+  return user;
+};
+
+// Hash password before saving into db
+userSchema.pre("save", async function(next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
+  next();
+});
+
+// Remove tasks owned by the user before deleting it
+userSchema.pre("remove", async function(next) {
+  await Task.deleteMany({ owner: this._id });
+  next();
+});
+
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
