@@ -19,11 +19,17 @@ const taskRouter = getRouter(
 
 // GET /tasks?completed=true/false
 // GET /tasks?limit=10&skip=20
+// GET /tasks?sortBy=createdAt_asc
 taskRouter.get("", auth, async (req, res) => {
   const match = {};
-  const { completed, limit, skip } = req.query;
+  const sort = {};
+  const { completed, limit, skip, sortBy } = req.query;
   if (completed) {
     match.completed = completed === "true";
+  }
+  if (sortBy) {
+    const [sortField, sortDirection] = sortBy.split('_');
+    sort[sortField] = sortDirection === 'desc' ? -1 : 1;
   }
 
   try {
@@ -33,7 +39,8 @@ taskRouter.get("", auth, async (req, res) => {
         match,
         options: {
           limit: parseInt(limit),
-          skip: parseInt(skip)
+          skip: parseInt(skip),
+          sort
         }
       })
       .execPopulate();
