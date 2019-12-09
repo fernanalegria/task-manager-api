@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Task = require("./task");
 
 const failedLoginMsg = "Unable to login";
 
@@ -101,6 +102,12 @@ userSchema.pre("save", async function(next) {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 8);
   }
+  next();
+});
+
+// Remove tasks owned by the user before deleting it
+userSchema.pre("remove", async function(next) {
+  await Task.deleteMany({ owner: this._id });
   next();
 });
 
