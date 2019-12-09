@@ -1,11 +1,11 @@
 const HttpStatus = require("http-status-codes");
 const express = require("express");
 
-const { updateRouter, getErrorResponse } = require("./crud");
+const { getErrorResponse } = require("./crud");
 const { User } = require("../models");
 const { auth } = require("../middleware");
 
-let userRouter = new express.Router();
+const userRouter = new express.Router();
 
 const logoutMsg = "Unable to log out user";
 
