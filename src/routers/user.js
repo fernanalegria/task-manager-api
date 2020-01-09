@@ -6,6 +6,7 @@ const sharp = require("sharp");
 const { getErrorResponse } = require("./crud");
 const { User } = require("../models");
 const { auth } = require("../middleware");
+const { sendWelcomeEmail, sendGoodByeMail } = require("../emails");
 
 const logoutMsg = "Unable to log out user";
 const allowedImgTypes = ["image/jpeg", "image/png"];
@@ -36,6 +37,7 @@ userRouter.post("", async (req, res) => {
   const userInstance = new User(req.body);
   try {
     const user = await userInstance.save();
+    sendWelcomeEmail(user.email, user.name);
     const token = await user.generateAuthToken();
     res.status(HttpStatus.CREATED).send({ user, token });
   } catch (e) {
@@ -126,6 +128,8 @@ userRouter.get("/me", auth, async (req, res) => {
 userRouter.delete("/me", auth, async (req, res) => {
   try {
     await req.user.remove();
+    const user = req.user;
+    sendGoodByeMail(user.email, user.name);
     res.status(HttpStatus.NO_CONTENT).send();
   } catch (e) {
     const { error, statusCode } = getErrorResponse(e);
