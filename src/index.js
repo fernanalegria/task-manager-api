@@ -1,11 +1,11 @@
 const express = require("express");
 const dotenv = require("dotenv");
 
-require("./db");
-const { userRouter, taskRouter } = require("./routers");
-
 // Read environment variables
 dotenv.config();
+
+require("./db");
+const { userRouter, taskRouter } = require("./routers");
 
 // Port for Express config
 const port = process.env.PORT || 3000;
