@@ -1,22 +1,7 @@
-const express = require("express");
-const dotenv = require("dotenv");
-
-// Read environment variables
-dotenv.config();
-
-require("./db");
-const { userRouter, taskRouter } = require("./routers");
+const app = require("./app");
 
 // Port for Express config
 const port = process.env.PORT || 3000;
-
-const app = express();
-
-app.use(express.json());
-
-// Routes
-app.use("/users", userRouter);
-app.use("/tasks", taskRouter);
 
 app.listen(port, () => {
   console.log(`Server is up on port ${port}.`);
