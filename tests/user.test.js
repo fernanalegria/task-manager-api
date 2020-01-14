@@ -1,31 +1,12 @@
 const request = require("supertest");
 const HttpStatus = require("http-status-codes");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const app = require("../src/app");
-const User = require("../src/models/user");
+const { User } = require("../src/models");
+const { userOneId, userOne, userOneToken, setupDatabase } = require("./fixtures/db");
 
 const endpointUrl = "/users";
 
-const userOneId = new mongoose.Types.ObjectId();
-const token = jwt.sign(
-  {
-    _id: userOneId
-  },
-  process.env.SECRET_KEY
-);
-const userOne = {
-  _id: userOneId,
-  name: "Mike",
-  email: "mike@example.com",
-  password: ":zH7g6DW8WU({)a#",
-  tokens: [{ token }]
-};
-
-beforeEach(async () => {
-  await User.deleteMany();
-  await new User(userOne).save();
-});
+beforeEach(setupDatabase);
 
 test("Should sign up a new user", async () => {
   const requestUser = {
@@ -66,7 +47,7 @@ test("Should log in an existing user", async () => {
   expect(dbUser).not.toBeNull();
   expect(response.body).toMatchObject({
     user: {
-      _id: userOneId.toString(),
+      _id: userOneId,
       email
     },
     token: dbUser.tokens[1].token
@@ -87,7 +68,7 @@ test("Should not log in a non-existing user", async () => {
 test("Should get user profile", async () => {
   await request(app)
     .get(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `Bearer ${userOneToken}`)
     .send()
     .expect(HttpStatus.OK);
 });
@@ -102,7 +83,7 @@ test("Should not get unauthenticated user profile", async () => {
 test("Should delete user account", async () => {
   await request(app)
     .delete(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `Bearer ${userOneToken}`)
     .send()
     .expect(HttpStatus.NO_CONTENT);
 
@@ -120,7 +101,7 @@ test("Should not delete unauthenticated user account", async () => {
 test("Should upload avatar image", async () => {
   await request(app)
     .post(`${endpointUrl}/me/avatar`)
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `Bearer ${userOneToken}`)
     .attach("avatar", "tests/fixtures/profile-pic.jpg")
     .expect(HttpStatus.OK);
 
@@ -132,14 +113,14 @@ test("Should update valid user fields", async () => {
   const name = "Ben";
   const response = await request(app)
     .patch(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `Bearer ${userOneToken}`)
     .send({
       name
     })
     .expect(HttpStatus.OK);
 
   expect(response.body).toMatchObject({
-    _id: userOneId.toString(),
+    _id: userOneId,
     name
   });
 
@@ -151,7 +132,7 @@ test("Should update valid user fields", async () => {
 test("Should not update invalid user fields", async () => {
   await request(app)
     .patch(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${token}`)
+    .set("Authorization", `Bearer ${userOneToken}`)
     .send({
       location: "Zürich"
     })
