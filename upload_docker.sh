@@ -4,7 +4,7 @@
 # Assumes that an image is built via `run_docker.sh`
 
 # Step 1:
-# Create dockerpath
+# Set environment variables
 REGISTRY_URL="490300663378.dkr.ecr.us-east-2.amazonaws.com"
 DOCKER_IMAGE="task-manager-api:latest"
 
