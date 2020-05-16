@@ -9,7 +9,7 @@ pipeline {
             steps {
                 sh 'node --version'
                 sh 'npm --version'
-                sh 'npm run pretest'
+                sh 'ls -la'
             }
         }
     }
