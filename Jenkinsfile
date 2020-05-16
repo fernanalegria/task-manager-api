@@ -1,17 +1,14 @@
 pipeline {
     agent {
-        docker {
-            image 'node:14.2.0-alpine'
+        dockerfile {
+            filename 'Dockerfile.ci'
         }
     }
     stages {
-        stage('Build') {
-            steps {
-                sh 'npm install'
-            }
-        }
         stage('Lint JS code') {
             steps {
+                sh 'node --version'
+                sh 'npm --version'
                 sh 'npm run pretest'
             }
         }
