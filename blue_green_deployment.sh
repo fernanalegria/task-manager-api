@@ -49,13 +49,14 @@ kubectl apply -f k8s/release-candidate-load-balancer.yaml
 
 # Step 6:
 # Replace the old version with the new version
+kubectl delete deployment task-manager-api
 kubectl apply -f k8s/api-deployment.yaml
-sleep 3
 
 # Step 7:
 # Point the load balancer back to the task-manager-api deployment and delete the other deployment
-while [ $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
-    echo "Updating task-manager-api deployment..."
+while [ ! $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") ] \
+  ||[ $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
+    echo "Waiting for task-manager-api deployment to be ready..."
 done
 kubectl apply -f k8s/api-load-balancer.yaml
 kubectl delete deployment release-candidate
