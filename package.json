@@ -7,6 +7,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "debug": "nodemon inspect src/index.js",
+    "pretest": "eslint --ignore-path .gitignore .",
     "test": "jest --runInBand"
   },
   "jest": {
@@ -32,6 +33,7 @@
     "validator": "^11.1.0"
   },
   "devDependencies": {
+    "eslint": "^7.0.0",
     "jest": "^24.9.0",
     "nodemon": "^1.19.1",
     "supertest": "^4.0.2"
