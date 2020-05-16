@@ -11,6 +11,8 @@ pipeline {
                 sh 'npm --version'
                 sh 'ls -la'
                 sh 'ls -la /'
+                sh 'pwd'
+                sh 'ls -la /usr/env'
             }
         }
     }
