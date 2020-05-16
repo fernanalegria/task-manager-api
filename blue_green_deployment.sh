@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file deploys the task manager API to Kubernetes
+# This file makes a blue green deployment of the task manager API in Kubernetes
 
 # Reads an environment variable from a .env file
 read_var() {
@@ -36,9 +36,26 @@ kubectl create secret generic prod-env \
     --from-literal=MONGO_DB_NAME="$(read_var MONGO_DB_NAME)"
 
 # Step 4:
-# Create a task-manager-api deployment with two replicas 
-kubectl apply -f k8s/api-deployment.yaml
+# Create a deployment of the new version
+kubectl apply -f k8s/release-candidate-deployment.yaml
 
 # Step 5:
-# Create a load balancer that exposes the replicas evenly
+# Point the load balancer to the new version
+while [ ! $(kubectl get deployment release-candidate -o jsonpath="{.status.availableReplicas}") ] \
+  || [ $(kubectl get deployment release-candidate -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
+    echo "Waiting for release-candidate deployment to be ready..."
+done
+kubectl apply -f k8s/release-candidate-load-balancer.yaml
+
+# Step 6:
+# Replace the old version with the new version
+kubectl apply -f k8s/api-deployment.yaml
+sleep 3
+
+# Step 7:
+# Point the load balancer back to the task-manager-api deployment and delete the other deployment
+while [ $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
+    echo "Updating task-manager-api deployment..."
+done
 kubectl apply -f k8s/api-load-balancer.yaml
+kubectl delete deployment release-candidate
