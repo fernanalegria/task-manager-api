@@ -29,5 +29,17 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to EKS') {
+            agent {
+                docker {
+                    image 'weaveworks/eksctl'
+                }
+            }
+            steps {
+                withAWS(credentials: 'aws-credentials', region: 'us-east-2') {
+                    sh 'aws s3 ls'
+                }
+            }
+        }
     }
 }
