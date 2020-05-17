@@ -1,11 +1,12 @@
 pipeline {
-    agent {
-        dockerfile {
-            filename 'Dockerfile.ci'
-        }
-    }
+    agent node
     stages {
         stage('Lint JS code') {
+            agent {
+                dockerfile {
+                    filename 'Dockerfile.ci'
+                }
+            }
             steps {
                 sh 'eslint --ignore-path .gitignore .'
             }
