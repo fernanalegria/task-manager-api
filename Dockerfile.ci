@@ -1,5 +1,5 @@
 FROM node:14.2.0-alpine
 
-WORKDIR /usr/env
-
 RUN npm install eslint
+
+ENV PATH /node_modules/.bin:$PATH

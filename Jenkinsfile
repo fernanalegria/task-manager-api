@@ -7,12 +7,7 @@ pipeline {
     stages {
         stage('Lint JS code') {
             steps {
-                sh 'node --version'
-                sh 'npm --version'
-                sh 'ls -la'
-                sh 'ls -la /'
-                sh 'pwd'
-                sh 'ls -la /usr/env'
+                sh 'eslint --ignore-path .gitignore .'
             }
         }
     }
