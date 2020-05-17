@@ -14,7 +14,7 @@ pipeline {
         stage('Build image') {
             steps {
                 script {
-                    docker.build('task-manager-api:${env.BUILD_ID}')
+                    docker.build("task-manager-api:${env.BUILD_ID}")
                 }
             }
         }
@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://490300663378.dkr.ecr.us-east-2.amazonaws.com', 'ecr:us-east-2:aws-credentials') {
-                        def image = docker.image('task-manager-api:${env.BUILD_ID}')
+                        def image = docker.image("task-manager-api:${env.BUILD_ID}")
                         image.push()
                         image.push('latest')
                     }
