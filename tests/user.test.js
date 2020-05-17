@@ -1,17 +1,22 @@
-const request = require("supertest");
-const HttpStatus = require("http-status-codes");
-const app = require("../src/app");
-const { User } = require("../src/models");
-const { userOneId, userOne, userOneToken, setupDatabase } = require("./fixtures/db");
+const request = require('supertest');
+const HttpStatus = require('http-status-codes');
+const app = require('../src/app');
+const { User } = require('../src/models');
+const {
+  userOneId,
+  userOne,
+  userOneToken,
+  setupDatabase
+} = require('./fixtures/db');
 
-const endpointUrl = "/users";
+const endpointUrl = '/users';
 
 beforeEach(setupDatabase);
 
-test("Should sign up a new user", async () => {
+test('Should sign up a new user', async () => {
   const requestUser = {
-    name: "Fernando Alegria",
-    email: "fernanalegria@gmail.com",
+    name: 'Fernando Alegria',
+    email: 'fernanalegria@gmail.com',
     password: "'tEfn2QEN8MM]/*]"
   };
   const { name, email, password } = requestUser;
@@ -33,7 +38,7 @@ test("Should sign up a new user", async () => {
   });
 });
 
-test("Should log in an existing user", async () => {
+test('Should log in an existing user', async () => {
   const { email, password } = userOne;
   const response = await request(app)
     .post(`${endpointUrl}/login`)
@@ -54,36 +59,36 @@ test("Should log in an existing user", async () => {
   });
 });
 
-test("Should not log in a non-existing user", async () => {
+test('Should not log in a non-existing user', async () => {
   const { email } = userOne;
   await request(app)
     .post(`${endpointUrl}/login`)
     .send({
       email,
-      password: "=hN2w,?Cx}{gNQYP"
+      password: '=hN2w,?Cx}{gNQYP'
     })
     .expect(HttpStatus.BAD_REQUEST);
 });
 
-test("Should get user profile", async () => {
+test('Should get user profile', async () => {
   await request(app)
     .get(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${userOneToken}`)
+    .set('Authorization', `Bearer ${userOneToken}`)
     .send()
     .expect(HttpStatus.OK);
 });
 
-test("Should not get unauthenticated user profile", async () => {
+test('Should not get unauthenticated user profile', async () => {
   await request(app)
     .get(`${endpointUrl}/me`)
     .send()
     .expect(HttpStatus.UNAUTHORIZED);
 });
 
-test("Should delete user account", async () => {
+test('Should delete user account', async () => {
   await request(app)
     .delete(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${userOneToken}`)
+    .set('Authorization', `Bearer ${userOneToken}`)
     .send()
     .expect(HttpStatus.NO_CONTENT);
 
@@ -91,29 +96,29 @@ test("Should delete user account", async () => {
   expect(dbUser).toBeNull();
 });
 
-test("Should not delete unauthenticated user account", async () => {
+test('Should not delete unauthenticated user account', async () => {
   await request(app)
     .delete(`${endpointUrl}/me`)
     .send()
     .expect(HttpStatus.UNAUTHORIZED);
 });
 
-test("Should upload avatar image", async () => {
+test('Should upload avatar image', async () => {
   await request(app)
     .post(`${endpointUrl}/me/avatar`)
-    .set("Authorization", `Bearer ${userOneToken}`)
-    .attach("avatar", "tests/fixtures/profile-pic.jpg")
+    .set('Authorization', `Bearer ${userOneToken}`)
+    .attach('avatar', 'tests/fixtures/profile-pic.jpg')
     .expect(HttpStatus.OK);
 
   const dbUser = await User.findById(userOneId);
   expect(dbUser.avatar).toEqual(expect.any(Buffer));
 });
 
-test("Should update valid user fields", async () => {
-  const name = "Ben";
+test('Should update valid user fields', async () => {
+  const name = 'Ben';
   const response = await request(app)
     .patch(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${userOneToken}`)
+    .set('Authorization', `Bearer ${userOneToken}`)
     .send({
       name
     })
@@ -129,12 +134,12 @@ test("Should update valid user fields", async () => {
   expect(dbUser.name).toBe(name);
 });
 
-test("Should not update invalid user fields", async () => {
+test('Should not update invalid user fields', async () => {
   await request(app)
     .patch(`${endpointUrl}/me`)
-    .set("Authorization", `Bearer ${userOneToken}`)
+    .set('Authorization', `Bearer ${userOneToken}`)
     .send({
-      location: "Zürich"
+      location: 'Zürich'
     })
     .expect(HttpStatus.BAD_REQUEST);
 });

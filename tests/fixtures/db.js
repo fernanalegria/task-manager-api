@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const { User, Task } = require("../../src/models");
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const { User, Task } = require('../../src/models');
 
 const userOneId = new mongoose.Types.ObjectId();
 const userOneToken = jwt.sign(
@@ -11,9 +11,9 @@ const userOneToken = jwt.sign(
 );
 const userOne = {
   _id: userOneId,
-  name: "Mike",
-  email: "mike@example.com",
-  password: ":zH7g6DW8WU({)a#",
+  name: 'Mike',
+  email: 'mike@example.com',
+  password: ':zH7g6DW8WU({)a#',
   tokens: [{ token: userOneToken }]
 };
 
@@ -26,29 +26,29 @@ const userTwoToken = jwt.sign(
 );
 const userTwo = {
   _id: userTwoId,
-  name: "Harry",
-  email: "harry@example.com",
-  password: "y4aCq(@C6?Qs6_8P",
+  name: 'Harry',
+  email: 'harry@example.com',
+  password: 'y4aCq(@C6?Qs6_8P',
   tokens: [{ token: userTwoToken }]
 };
 
 const taskOne = {
   _id: new mongoose.Types.ObjectId(),
-  description: "First task",
+  description: 'First task',
   completed: false,
   owner: userOneId
 };
 
 const taskTwo = {
   _id: new mongoose.Types.ObjectId(),
-  description: "Second task",
+  description: 'Second task',
   completed: true,
   owner: userOneId
 };
 
 const taskThree = {
   _id: new mongoose.Types.ObjectId(),
-  description: "Third task",
+  description: 'Third task',
   completed: true,
   owner: userTwoId
 };

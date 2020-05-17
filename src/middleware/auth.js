@@ -1,14 +1,14 @@
-const jwt = require("jsonwebtoken");
-const { User } = require("../models");
-const HttpStatus = require("http-status-codes");
+const jwt = require('jsonwebtoken');
+const { User } = require('../models');
+const HttpStatus = require('http-status-codes');
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
+    const token = req.header('Authorization').replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findOne({
       _id: decoded._id,
-      "tokens.token": token
+      'tokens.token': token
     });
 
     if (!user) {
@@ -19,7 +19,7 @@ const auth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (e) {
-    res.status(HttpStatus.UNAUTHORIZED).send({ error: "Please authenticate." });
+    res.status(HttpStatus.UNAUTHORIZED).send({ error: 'Please authenticate.' });
   }
 };
 

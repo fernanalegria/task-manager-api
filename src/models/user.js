@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const Task = require("./task");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Task = require('./task');
 
-const failedLoginMsg = "Unable to login";
+const failedLoginMsg = 'Unable to login';
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       validate(value) {
         if (!validator.isEmail(value)) {
-          throw new Error("Email is invalid");
+          throw new Error('Email is invalid');
         }
       }
     },
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
       minlength: 7,
       trim: true,
       validate(value) {
-        if (value.toLowerCase().includes("password")) {
+        if (value.toLowerCase().includes('password')) {
           throw new Error(
             'The user password cannot contain the keyword "password"'
           );
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
       default: 0,
       validate(value) {
         if (value < 0) {
-          throw new Error("Age must be a positive number");
+          throw new Error('Age must be a positive number');
         }
       }
     },
@@ -64,13 +64,13 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.virtual("tasks", {
-  ref: "Task",
-  localField: "_id",
-  foreignField: "owner"
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'owner'
 });
 
-userSchema.methods.toJSON = function() {
+userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
   delete userObject.password;
@@ -79,14 +79,14 @@ userSchema.methods.toJSON = function() {
   return userObject;
 };
 
-userSchema.methods.generateAuthToken = async function() {
+userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = await jwt.sign(
     {
       _id: user._id
     },
     process.env.SECRET_KEY,
-    { expiresIn: "1 day" }
+    { expiresIn: '1 day' }
   );
   user.tokens.push({ token });
   await user.save();
@@ -107,19 +107,19 @@ userSchema.statics.findByCredentials = async (email, password) => {
 };
 
 // Hash password before saving into db
-userSchema.pre("save", async function(next) {
-  if (this.isModified("password")) {
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 8);
   }
   next();
 });
 
 // Remove tasks owned by the user before deleting it
-userSchema.pre("remove", async function(next) {
+userSchema.pre('remove', async function (next) {
   await Task.deleteMany({ owner: this._id });
   next();
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

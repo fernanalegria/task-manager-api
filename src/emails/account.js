@@ -1,12 +1,12 @@
-const sgMail = require("@sendgrid/mail");
+const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.EMAIL_SERVICE_KEY);
 
 const sendWelcomeEmail = (email, name) =>
   sgMail.send({
     to: email,
-    from: "fernanalegria@gmail.com",
-    subject: "Welcome to Task Manager API!",
+    from: 'fernanalegria@gmail.com',
+    subject: 'Welcome to Task Manager API!',
     text: `Welcome to Task Manager API, ${name}.
     
             Let us know how you get along with the app.
@@ -18,8 +18,8 @@ const sendWelcomeEmail = (email, name) =>
 const sendGoodByeMail = (email, name) =>
   sgMail.send({
     to: email,
-    from: "fernanalegria@gmail.com",
-    subject: "We are sad to see you go :(",
+    from: 'fernanalegria@gmail.com',
+    subject: 'We are sad to see you go :(',
     text: `Hi ${name},
             
             We have seen you have recently cancelled your Task Manager API account.
