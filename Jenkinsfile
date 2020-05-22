@@ -37,8 +37,10 @@ pipeline {
             }
             steps {
                 withAWS(credentials: 'aws-credentials', region: 'us-east-2') {
-                    sh 'aws s3 ls'
-                    sh 'chmod 777 $HOME/.kube'
+                    sh 'adduser -D aws'
+                    sh 'su - aws'
+                    sh 'echo $HOME'
+                    sh 'whoami'
                     sh 'aws eks --region us-east-2 update-kubeconfig --name production'
                     sh 'kubectl get svc'
                 }
