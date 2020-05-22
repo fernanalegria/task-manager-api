@@ -33,7 +33,7 @@ pipeline {
             agent {
                 docker {
                     image 'weaveworks/eksctl'
-                    args '-u root:sudo'
+                    args '-u root:root'
                 }
             }
             steps {
