@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # This file makes a blue green deployment of the task manager API in Kubernetes
 
-# Reads an environment variable from a .env file
+# Reads an environment variable from AWS parameter store
 read_var() {
-    VAR=$(grep $1 prod.env | xargs)
-    IFS="=" read -ra VAR <<< "$VAR"
-    echo ${VAR[1]}
+    VAR=$(aws ssm get-parameter --name $1 --output text --query "Parameter.Value")
+    echo ${VAR}
 }
 
 # Step 1:
@@ -29,11 +28,11 @@ if [ $(kubectl get secret prod-env -o jsonpath='{.kind}') ]
     kubectl delete secret prod-env
 fi
 kubectl create secret generic prod-env \
-    --from-literal=PORT="$(read_var PORT)" \
-    --from-literal=SECRET_KEY="$(read_var SECRET_KEY)" \
-    --from-literal=EMAIL_SERVICE_KEY="$(read_var EMAIL_SERVICE_KEY)" \
-    --from-literal=MONGO_DB_URL="$(read_var MONGO_DB_URL)" \
-    --from-literal=MONGO_DB_NAME="$(read_var MONGO_DB_NAME)"
+    --from-literal=PORT="$(read_var TaskManagerPort)" \
+    --from-literal=SECRET_KEY="$(read_var TaskManagerSecretKey)" \
+    --from-literal=EMAIL_SERVICE_KEY="$(read_var TaskManagerEmailServiceKey)" \
+    --from-literal=MONGO_DB_URL="$(read_var TaskManagerMongoDBUrl)" \
+    --from-literal=MONGO_DB_NAME="$(read_var TaskManagerMongoDBName)"
 
 # Step 4:
 # Create a deployment of the new version
