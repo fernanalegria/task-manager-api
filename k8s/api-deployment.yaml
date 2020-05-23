@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-api
+  labels:
+    app: task-manager-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: task-manager-api
+  template:
+    metadata:
+      labels:
+        app: task-manager-api
+    spec:
+      containers:
+      - name: task-manager-api
+        image: 490300663378.dkr.ecr.us-east-2.amazonaws.com/task-manager-api:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+          - secretRef:
+              name: prod-env

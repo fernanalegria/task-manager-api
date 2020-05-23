@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-manager-service
+  labels:
+    app: task-manager-load-balancer
+spec:
+  selector:
+    app: release-candidate
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer
