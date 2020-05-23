@@ -1,0 +1,5 @@
+FROM node:14.2.0-alpine
+
+RUN npm install eslint@7.0.0 eslint-config-strongloop@2.1.0
+
+ENV PATH /node_modules/.bin:$PATH

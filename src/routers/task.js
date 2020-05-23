@@ -1,7 +1,7 @@
-const HttpStatus = require("http-status-codes");
-const { getRouter } = require("./crud");
-const { Task } = require("../models");
-const { auth } = require("../middleware");
+const HttpStatus = require('http-status-codes');
+const { getRouter } = require('./crud');
+const { Task } = require('../models');
+const { auth } = require('../middleware');
 
 const taskRouter = getRouter(
   Task,
@@ -13,19 +13,19 @@ const taskRouter = getRouter(
     delete: true
   },
   {
-    allowedUpdates: ["description", "completed"]
+    allowedUpdates: ['description', 'completed']
   }
 );
 
 // GET /tasks?completed=true/false
 // GET /tasks?limit=10&skip=20
 // GET /tasks?sortBy=createdAt_asc
-taskRouter.get("", auth, async (req, res) => {
+taskRouter.get('', auth, async (req, res) => {
   const match = {};
   const sort = {};
   const { completed, limit, skip, sortBy } = req.query;
   if (completed) {
-    match.completed = completed === "true";
+    match.completed = completed === 'true';
   }
   if (sortBy) {
     const [sortField, sortDirection] = sortBy.split('_');
@@ -35,11 +35,11 @@ taskRouter.get("", auth, async (req, res) => {
   try {
     await req.user
       .populate({
-        path: "tasks",
+        path: 'tasks',
         match,
         options: {
-          limit: parseInt(limit),
-          skip: parseInt(skip),
+          limit: parseInt(limit, 10),
+          skip: parseInt(skip, 10),
           sort
         }
       })

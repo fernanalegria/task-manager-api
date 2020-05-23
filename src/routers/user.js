@@ -1,15 +1,15 @@
-const HttpStatus = require("http-status-codes");
-const express = require("express");
-const multer = require("multer");
-const sharp = require("sharp");
+const HttpStatus = require('http-status-codes');
+const express = require('express');
+const multer = require('multer');
+const sharp = require('sharp');
 
-const { getErrorResponse } = require("./crud");
-const { User } = require("../models");
-const { auth } = require("../middleware");
-const { sendWelcomeEmail, sendGoodByeMail } = require("../emails");
+const { getErrorResponse } = require('./crud');
+const { User } = require('../models');
+const { auth } = require('../middleware');
+const { sendWelcomeEmail, sendGoodByeMail } = require('../emails');
 
-const logoutMsg = "Unable to log out user";
-const allowedImgTypes = ["image/jpeg", "image/png"];
+const logoutMsg = 'Unable to log out user';
+const allowedImgTypes = ['image/jpeg', 'image/png'];
 const allowedFileExtensions = /\.(jpg|jpeg|png)$/;
 const imgSize = { width: 250, height: 250 };
 
@@ -25,7 +25,8 @@ const upload = multer({
     ) {
       return cb(
         new Error(
-          "Please upload an image. Only the following formats are allowed: jpg, jpeg and png."
+          'Please upload an image. ' +
+            'Only the following formats are allowed: jpg, jpeg and png.'
         )
       );
     }
@@ -33,7 +34,7 @@ const upload = multer({
   }
 });
 
-userRouter.post("", async (req, res) => {
+userRouter.post('', async (req, res) => {
   const userInstance = new User(req.body);
   try {
     const user = await userInstance.save();
@@ -45,11 +46,11 @@ userRouter.post("", async (req, res) => {
   }
 });
 
-userRouter.post("/login", async (req, res) => {
+userRouter.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      throw new Error("You must provide email and password");
+      throw new Error('You must provide email and password');
     }
     const user = await User.findByCredentials(email, password);
     const token = await user.generateAuthToken();
@@ -59,7 +60,7 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.post("/logout", auth, async (req, res) => {
+userRouter.post('/logout', auth, async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter(doc => doc.token !== req.token);
     await req.user.save();
@@ -70,7 +71,7 @@ userRouter.post("/logout", auth, async (req, res) => {
   }
 });
 
-userRouter.post("/logoutAll", auth, async (req, res) => {
+userRouter.post('/logoutAll', auth, async (req, res) => {
   try {
     req.user.tokens = [];
     await req.user.save();
@@ -82,15 +83,12 @@ userRouter.post("/logoutAll", auth, async (req, res) => {
 });
 
 userRouter.post(
-  "/me/avatar",
+  '/me/avatar',
   auth,
-  upload.single("avatar"),
+  upload.single('avatar'),
   async (req, res) => {
     const user = req.user;
-    user.avatar = await sharp(req.file.buffer)
-      .resize(imgSize)
-      .png()
-      .toBuffer();
+    user.avatar = await sharp(req.file.buffer).resize(imgSize).png().toBuffer();
     await user.save();
     res.status(HttpStatus.OK).send();
   },
@@ -99,14 +97,14 @@ userRouter.post(
   }
 );
 
-userRouter.delete("/me/avatar", auth, async (req, res) => {
+userRouter.delete('/me/avatar', auth, async (req, res) => {
   const user = req.user;
   user.avatar = undefined;
   await user.save();
   res.status(HttpStatus.OK).send();
 });
 
-userRouter.get("/:id/avatar", auth, async (req, res) => {
+userRouter.get('/:id/avatar', auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -114,18 +112,18 @@ userRouter.get("/:id/avatar", auth, async (req, res) => {
       throw new Error();
     }
 
-    res.set("Content-Type", "image/png");
+    res.set('Content-Type', 'image/png');
     res.status(HttpStatus.OK).send(user.avatar);
   } catch (e) {
     res.status(HttpStatus.NOT_FOUND).send();
   }
 });
 
-userRouter.get("/me", auth, async (req, res) => {
+userRouter.get('/me', auth, async (req, res) => {
   res.status(HttpStatus.OK).send(req.user);
 });
 
-userRouter.delete("/me", auth, async (req, res) => {
+userRouter.delete('/me', auth, async (req, res) => {
   try {
     await req.user.remove();
     const user = req.user;
@@ -137,8 +135,8 @@ userRouter.delete("/me", auth, async (req, res) => {
   }
 });
 
-userRouter.patch("/me", auth, async (req, res) => {
-  const allowedUpdates = ["name", "email", "password", "age"];
+userRouter.patch('/me', auth, async (req, res) => {
+  const allowedUpdates = ['name', 'email', 'password', 'age'];
   const updateFields = Object.keys(req.body);
   const invalidUpdates = updateFields.filter(
     update => !allowedUpdates.includes(update)
@@ -153,7 +151,7 @@ userRouter.patch("/me", auth, async (req, res) => {
     updateFields.forEach(field => {
       req.user[field] = req.body[field];
     });
-    user = await req.user.save();
+    const user = await req.user.save();
     res.status(HttpStatus.OK).send(user);
   } catch (e) {
     const { error, statusCode } = getErrorResponse(e);

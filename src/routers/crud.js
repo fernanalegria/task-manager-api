@@ -1,8 +1,8 @@
-const HttpStatus = require("http-status-codes");
-const express = require("express");
-const { auth } = require("../middleware");
+const HttpStatus = require('http-status-codes');
+const express = require('express');
+const { auth } = require('../middleware');
 
-const badRequestErrors = ["ValidationError", "CastError"];
+const badRequestErrors = ['ValidationError', 'CastError'];
 
 const getErrorResponse = e => {
   const statusCode = badRequestErrors.includes(e.name)
@@ -13,7 +13,7 @@ const getErrorResponse = e => {
 };
 
 const hasOwner = ModelClass =>
-  Object.keys(ModelClass.schema.paths).includes("owner");
+  Object.keys(ModelClass.schema.paths).includes('owner');
 
 const createDocument = async (ModelClass, document, user, res) => {
   if (hasOwner(ModelClass)) {
@@ -130,25 +130,25 @@ const getRouter = (ModelClass, methods, options) => {
 
 const updateRouter = (router, ModelClass, methods, options = {}) => {
   if (methods.create) {
-    router.post("", auth, (req, res) => {
+    router.post('', auth, (req, res) => {
       createDocument(ModelClass, req.body, req.user, res);
     });
   }
 
   if (methods.readAll) {
-    router.get("", auth, (req, res) => {
+    router.get('', auth, (req, res) => {
       getAllDocuments(ModelClass, req.user, res);
     });
   }
 
   if (methods.readDetail) {
-    router.get("/:id", auth, (req, res) => {
+    router.get('/:id', auth, (req, res) => {
       getDocumentById(ModelClass, req.params.id, req.user, res);
     });
   }
 
   if (methods.update) {
-    router.patch("/:id", auth, (req, res) => {
+    router.patch('/:id', auth, (req, res) => {
       updateDocument(
         ModelClass,
         req.params.id,
@@ -161,7 +161,7 @@ const updateRouter = (router, ModelClass, methods, options = {}) => {
   }
 
   if (methods.delete) {
-    router.delete("/:id", auth, (req, res) => {
+    router.delete('/:id', auth, (req, res) => {
       deleteDocument(ModelClass, req.params.id, req.user, res);
     });
   }

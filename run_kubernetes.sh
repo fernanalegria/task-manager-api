@@ -14,15 +14,6 @@ REGISTRY_URL="490300663378.dkr.ecr.us-east-2.amazonaws.com"
 DOCKER_IMAGE="task-manager-api:latest"
 
 # Step 2:
-# Create a secret from a token to access ECR
-if [ $(kubectl get secret regcred -o jsonpath='{.kind}') ]
-  then
-    kubectl delete secret regcred
-fi
-kubectl create secret docker-registry regcred --docker-server=$REGISTRY_URL \
-    --docker-username=AWS --docker-password=$(aws ecr get-login-password --region us-east-2)
-
-# Step 3:
 # Create a secret with the environment variables needed
 if [ $(kubectl get secret prod-env -o jsonpath='{.kind}') ]
   then
@@ -35,10 +26,10 @@ kubectl create secret generic prod-env \
     --from-literal=MONGO_DB_URL="$(read_var MONGO_DB_URL)" \
     --from-literal=MONGO_DB_NAME="$(read_var MONGO_DB_NAME)"
 
-# Step 4:
+# Step 3:
 # Create a task-manager-api deployment with two replicas 
 kubectl apply -f k8s/api-deployment.yaml
 
-# Step 5:
+# Step 4:
 # Create a load balancer that exposes the replicas evenly
 kubectl apply -f k8s/api-load-balancer.yaml
