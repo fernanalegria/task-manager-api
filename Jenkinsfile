@@ -39,7 +39,7 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-credentials', region: 'us-east-2') {
                     sh 'aws eks --region us-east-2 update-kubeconfig --name production'
-                    sh 'ls -la'
+                    sh 'chmod u+x ./blue_green_deployment.sh'
                     sh './blue_green_deployment.sh'
                 }
             }
