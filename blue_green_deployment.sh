@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # This file makes a blue green deployment of the task manager API in Kubernetes
 
 # Reads an environment variable from AWS parameter store
