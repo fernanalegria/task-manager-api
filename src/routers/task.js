@@ -38,8 +38,8 @@ taskRouter.get('', auth, async (req, res) => {
         path: 'tasks',
         match,
         options: {
-          limit: parseInt(limit),
-          skip: parseInt(skip),
+          limit: parseInt(limit, 10),
+          skip: parseInt(skip, 10),
           sort
         }
       })
