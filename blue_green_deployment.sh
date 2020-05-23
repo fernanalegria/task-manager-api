@@ -12,15 +12,6 @@ REGISTRY_URL="490300663378.dkr.ecr.us-east-2.amazonaws.com"
 DOCKER_IMAGE="task-manager-api:latest"
 
 # Step 2:
-# Create a secret from a token to access ECR
-if [ $(kubectl get secret regcred -o jsonpath='{.kind}') ]
-  then
-    kubectl delete secret regcred
-fi
-kubectl create secret docker-registry regcred --docker-server=$REGISTRY_URL \
-    --docker-username=AWS --docker-password=$(aws ecr get-login-password --region us-east-2)
-
-# Step 3:
 # Create a secret with the environment variables needed
 if [ $(kubectl get secret prod-env -o jsonpath='{.kind}') ]
   then
@@ -33,11 +24,11 @@ kubectl create secret generic prod-env \
     --from-literal=MONGO_DB_URL="$(read_var TaskManagerMongoDBUrl)" \
     --from-literal=MONGO_DB_NAME="$(read_var TaskManagerMongoDBName)"
 
-# Step 4:
+# Step 3:
 # Create a deployment of the new version
 kubectl apply -f k8s/release-candidate-deployment.yaml
 
-# Step 5:
+# Step 4:
 # Point the load balancer to the new version
 while [ ! $(kubectl get deployment release-candidate -o jsonpath="{.status.availableReplicas}") ] \
   || [ $(kubectl get deployment release-candidate -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
@@ -45,12 +36,12 @@ while [ ! $(kubectl get deployment release-candidate -o jsonpath="{.status.avail
 done
 kubectl apply -f k8s/release-candidate-load-balancer.yaml
 
-# Step 6:
+# Step 5:
 # Replace the old version with the new version
 kubectl delete deployment task-manager-api
 kubectl apply -f k8s/api-deployment.yaml
 
-# Step 7:
+# Step 6:
 # Point the load balancer back to the task-manager-api deployment and delete the other deployment
 while [ ! $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") ] \
   ||[ $(kubectl get deployment task-manager-api -o jsonpath="{.status.availableReplicas}") -lt 2 ]; do
